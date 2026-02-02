@@ -21,6 +21,9 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
   bool _isLoading = true;
   String? _error;
 
+  // ❤️ Favorite state
+  bool _isFavorite = false;
+
   @override
   void initState() {
     super.initState();
@@ -48,27 +51,45 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
     }
   }
 
-  // สีตาม Type
+  // 🎨 สีตาม Type
   Color _getTypeColor(String type) {
     switch (type.toLowerCase()) {
-      case 'fire': return Colors.orange;
-      case 'water': return Colors.blue;
-      case 'grass': return Colors.green;
-      case 'electric': return Colors.yellow.shade700;
-      case 'psychic': return Colors.pink;
-      case 'ice': return Colors.cyan;
-      case 'dragon': return Colors.indigo;
-      case 'dark': return Colors.brown;
-      case 'fairy': return Colors.pinkAccent;
-      case 'fighting': return Colors.red.shade900;
-      case 'flying': return Colors.lightBlue;
-      case 'poison': return Colors.purple;
-      case 'ground': return Colors.brown.shade300;
-      case 'rock': return Colors.grey;
-      case 'bug': return Colors.lightGreen;
-      case 'ghost': return Colors.deepPurple;
-      case 'steel': return Colors.blueGrey;
-      default: return Colors.grey;
+      case 'fire':
+        return Colors.orange;
+      case 'water':
+        return Colors.blue;
+      case 'grass':
+        return Colors.green;
+      case 'electric':
+        return Colors.yellow.shade700;
+      case 'psychic':
+        return Colors.pink;
+      case 'ice':
+        return Colors.cyan;
+      case 'dragon':
+        return Colors.indigo;
+      case 'dark':
+        return Colors.brown;
+      case 'fairy':
+        return Colors.pinkAccent;
+      case 'fighting':
+        return Colors.red.shade900;
+      case 'flying':
+        return Colors.lightBlue;
+      case 'poison':
+        return Colors.purple;
+      case 'ground':
+        return Colors.brown.shade300;
+      case 'rock':
+        return Colors.grey;
+      case 'bug':
+        return Colors.lightGreen;
+      case 'ghost':
+        return Colors.deepPurple;
+      case 'steel':
+        return Colors.blueGrey;
+      default:
+        return Colors.grey;
     }
   }
 
@@ -88,6 +109,26 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
           style: const TextStyle(color: Colors.white),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _isFavorite = !_isFavorite;
+              });
+            },
+            icon: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, animation) {
+                return ScaleTransition(scale: animation, child: child);
+              },
+              child: Icon(
+                _isFavorite ? Icons.favorite : Icons.favorite_border,
+                key: ValueKey(_isFavorite),
+                color: _isFavorite ? Colors.pinkAccent : Colors.white,
+              ),
+            ),
+          ),
+        ],
       ),
       body: _buildBody(),
     );
@@ -121,7 +162,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // รูป Pokemon
+          // 🖼 รูป Pokémon
           Hero(
             tag: 'pokemon-${widget.pokemon.id}',
             child: Image.network(
@@ -131,7 +172,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
             ),
           ),
 
-          // ข้อมูลด้านล่าง
+          // 📦 ข้อมูลด้านล่าง
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(24),
@@ -145,7 +186,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ID และชื่อ
+                // ID
                 Center(
                   child: Text(
                     '#${_detail!.id.toString().padLeft(3, '0')}',
@@ -156,6 +197,8 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
+
+                // Name
                 Center(
                   child: Text(
                     _detail!.name.toUpperCase(),
@@ -165,6 +208,21 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                     ),
                   ),
                 ),
+
+                // ❤️ Favorite text
+                if (_isFavorite)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 4),
+                      child: Text(
+                        '❤️ Favorite Pokémon',
+                        style: TextStyle(
+                          color: Colors.pink,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
 
                 // Types
                 const SizedBox(height: 16),
@@ -192,7 +250,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                   }).toList(),
                 ),
 
-                // ข้อมูลพื้นฐาน
+                // Info cards
                 const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -220,7 +278,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                ..._detail!.stats.map((stat) => _buildStatBar(stat)),
+                ..._detail!.stats.map(_buildStatBar),
               ],
             ),
           ),
@@ -262,8 +320,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
   Widget _buildStatBar(PokemonStat stat) {
     final statName = stat.stat.name.replaceAll('-', ' ').toUpperCase();
     final value = stat.baseStat;
-    final maxValue = 255;
-    final percentage = value / maxValue;
+    final percentage = value / 255;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
